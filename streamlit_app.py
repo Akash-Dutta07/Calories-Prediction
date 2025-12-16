@@ -1,6 +1,5 @@
 import streamlit as st
 import requests
-import plotly.graph_objects as go
 
 # Page configuration
 st.set_page_config(
@@ -150,116 +149,21 @@ if st.button("🔮 Predict Calories Burnt"):
                 if result.get("status") == "success":
                     prediction = result.get("prediction", {})
                     calories = prediction.get("calories_burnt", 0)
-                    cal_per_min = prediction.get("calories_per_minute", 0)
                     
                     # Success message
                     st.success("✅ Prediction Complete!")
                     
-                    # Display metrics
-                    metric_col1, metric_col2, metric_col3 = st.columns(3)
+                    # Display only calories burnt - centered and large
+                    st.markdown("<br>", unsafe_allow_html=True)
                     
-                    with metric_col1:
-                        st.metric(
-                            label="🔥 Total Calories",
-                            value=f"{calories:.2f} kcal"
-                        )
-                    
-                    with metric_col2:
-                        st.metric(
-                            label="⚡ Per Minute",
-                            value=f"{cal_per_min:.2f} kcal/min"
-                        )
-                    
-                    with metric_col3:
-                        # Calculate BMI
-                        bmi = weight / ((height/100) ** 2)
-                        st.metric(
-                            label="📊 BMI",
-                            value=f"{bmi:.1f}"
-                        )
-                    
-                    st.markdown("---")
-                    
-                    # Visualization
-                    st.subheader("📈 Visualization")
-                    
-                    # Gauge chart
-                    fig = go.Figure(go.Indicator(
-                        mode="gauge+number+delta",
-                        value=calories,
-                        domain={'x': [0, 1], 'y': [0, 1]},
-                        title={'text': "Calories Burnt (kcal)", 'font': {'size': 24}},
-                        delta={'reference': 100, 'increasing': {'color': "green"}},
-                        gauge={
-                            'axis': {'range': [None, 350], 'tickwidth': 1},
-                            'bar': {'color': "#FF4B4B"},
-                            'bgcolor': "white",
-                            'borderwidth': 2,
-                            'bordercolor': "gray",
-                            'steps': [
-                                {'range': [0, 100], 'color': '#E8F5E9'},
-                                {'range': [100, 200], 'color': '#C8E6C9'},
-                                {'range': [200, 350], 'color': '#A5D6A7'}
-                            ],
-                            'threshold': {
-                                'line': {'color': "red", 'width': 4},
-                                'thickness': 0.75,
-                                'value': 250
-                            }
-                        }
-                    ))
-                    
-                    fig.update_layout(
-                        height=400,
-                        font={'color': "black", 'family': "Arial"}
-                    )
-                    st.plotly_chart(fig, use_container_width=True)
-                    
-                    # Insights
-                    st.markdown("---")
-                    st.subheader("💡 Insights")
-                    
-                    insight_col1, insight_col2 = st.columns(2)
-                    
-                    with insight_col1:
-                        activity_level = "High" if calories > 150 else "Moderate" if calories > 75 else "Low"
-                        st.info(f"""
-                        **Activity Intensity**: {activity_level}
-                        
-                        Your {duration}-minute workout at {heart_rate} bpm 
-                        burned {calories:.1f} calories.
-                        """)
-                    
-                    with insight_col2:
-                        # Equivalent activities
-                        walking_equiv = calories / 4.5  # ~4.5 cal/min for brisk walking
-                        running_equiv = calories / 10   # ~10 cal/min for running
-                        
-                        st.info(f"""
-                        **Equivalent Activities**:
-                        
-                        • {walking_equiv:.0f} min of brisk walking
-                        • {running_equiv:.0f} min of running
-                        """)
-                    
-                    # Additional stats
-                    st.markdown("---")
-                    st.subheader("📋 Session Details")
-                    
-                    details_col1, details_col2 = st.columns(2)
-                    
-                    with details_col1:
-                        st.write("**Input Parameters:**")
-                        st.write(f"• Gender: {gender.capitalize()}")
-                        st.write(f"• Age: {age} years")
-                        st.write(f"• Height: {height} cm")
-                        st.write(f"• Weight: {weight} kg")
-                    
-                    with details_col2:
-                        st.write("**Exercise Metrics:**")
-                        st.write(f"• Duration: {duration} minutes")
-                        st.write(f"• Heart Rate: {heart_rate} bpm")
-                        st.write(f"• Body Temp: {body_temp}°C")
+                    col1, col2, col3 = st.columns([1, 2, 1])
+                    with col2:
+                        st.markdown(f"""
+                        <div style='text-align: center; padding: 3rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);'>
+                            <h1 style='color: white; font-size: 4rem; margin: 0; font-weight: bold;'>{calories:.2f}</h1>
+                            <p style='color: white; font-size: 1.8rem; margin-top: 1rem; opacity: 0.9;'>Calories Burnt</p>
+                        </div>
+                        """, unsafe_allow_html=True)
                 
                 else:
                     st.error("❌ Prediction failed. Please try again.")
