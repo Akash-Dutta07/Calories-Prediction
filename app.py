@@ -1,26 +1,30 @@
-from fastapi import FastAPI, Form, Request, Depends
-from fastapi.templating import Jinja2Templates
+from fastapi import FastAPI, Form
 import pickle
 import pandas as pd
 
 
-app = FastAPI()
+app = FastAPI(title="Calories Prediction API")
 
 # Load the ML model
 with open("pipeline_model.pkl", "rb") as f:
     pipeline = pickle.load(f)
 
-# Setup templates directory
-templates = Jinja2Templates(directory="templates")
-
 
 @app.get("/")
-def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+def home():
+    """API information endpoint"""
+    return {
+        "message": "Calories Burnt Prediction API",
+        "version": "1.0",
+        "endpoints": {
+            "/predict": "POST - Predict calories burnt",
+            "/health": "GET - Health check"
+        }
+    }
+
 
 @app.post("/predict")
 def predict(
-    request: Request,
     Gender: str = Form(...),
     Age: float = Form(...),
     Height: float = Form(...),
@@ -29,6 +33,8 @@ def predict(
     Heart_Rate: float = Form(...),
     Body_Temp: float = Form(...)
 ):
+    """Prediction endpoint - returns JSON response"""
+    # Create dataframe from input
     sample = pd.DataFrame({
         "Gender": [Gender],
         "Age": [Age],
@@ -39,10 +45,38 @@ def predict(
         "Body_Temp": [Body_Temp]
     }, index=[0])
 
+    # Make prediction
     result = pipeline.predict(sample)[0]
     
-    return templates.TemplateResponse("result.html", {"request": request, "calories": result})
+    # Return JSON response
+    return {
+        "status": "success",
+        "prediction": {
+            "calories_burnt": float(result),
+            "calories_per_minute": float(result / Duration)
+        },
+        "input_data": {
+            "gender": Gender,
+            "age": Age,
+            "height": Height,
+            "weight": Weight,
+            "duration": Duration,
+            "heart_rate": Heart_Rate,
+            "body_temp": Body_Temp
+        }
+    }
+
+
+@app.get("/health")
+def health_check():
+    """Health check endpoint"""
+    return {
+        "status": "healthy",
+        "model": "loaded",
+        "api": "running"
+    }
+
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)

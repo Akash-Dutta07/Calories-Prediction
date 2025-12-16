@@ -1,12 +1,14 @@
 streamlit
 pandas
-scikit-learn
+scikit-learn==1.3.2
+xgboost
 joblib
 fastapi
 uvicorn[standard]
 pydantic
 requests
-numpy
+numpy>=1.17.3,<2.0
 matplotlib
 seaborn
 plotly
+python-multipart
